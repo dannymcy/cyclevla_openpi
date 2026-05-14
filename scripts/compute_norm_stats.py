@@ -7,10 +7,12 @@ to the config assets directory.
 Usage (run from `openpi/`):
 
   # Upstream LIBERO LeRobot dataset (7-D actions):
-  uv run scripts/compute_norm_stats.py pi05_libero
+  uv run scripts/compute_norm_stats.py --config-name pi05_libero
 
   # CycleVLA subtask-decomposed LIBERO LeRobot dataset (9-D actions):
-  uv run scripts/compute_norm_stats.py pi05_libero_cyclevla
+  export HF_HOME=/hdd2/kai/openvla-oft/openpi/data/huggingface
+  export HF_LEROBOT_HOME=/hdd2/kai/openvla-oft/openpi/data/lerobot
+  uv run scripts/compute_norm_stats.py --config-name pi05_libero_cyclevla
 """
 
 import numpy as np
