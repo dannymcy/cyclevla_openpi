@@ -761,6 +761,40 @@ _CONFIGS = [
         pytorch_weight_path="/path/to/your/pytorch_weight_path",
         num_train_steps=30_000,
     ),
+    # CycleVLA: subtask-decomposed LIBERO with 9-D actions
+    # [6D EEF delta, gripper, stop (s_t), progress (p_t)]. Built by
+    # examples/libero/convert_libero_data_to_lerobot_cyclevla.py from the
+    # Stage-3 RLDS dataset (rlds_dataset_builder/LIBERO_Decomposed_Progress/).
+    # Model action_dim stays at Pi0Config's default (32); PadStatesAndActions
+    # zero-pads 9->32 at the model boundary, so pi05 trains 9 real dims + 23
+    # dead pad dims. extra_delta_transform=False because dims 0-5 are already
+    # deltas in our LeRobot dataset. action_horizon=10 mirrors pi05_libero
+    # (LIBERO episodes are short; our subtask sub-episodes even shorter).
+    # weight_loader: start from the openpi-released LIBERO-finetuned pi05
+    # checkpoint (not pi05_base) since architecture matches exactly and the
+    # model already knows LIBERO — we only need to learn the two new
+    # supervision dims and subtask-level prompting.
+    TrainConfig(
+        name="pi05_libero_cyclevla",
+        model=pi0_config.Pi0Config(pi05=True, action_horizon=10, discrete_state_input=False),
+        data=LeRobotLiberoDataConfig(
+            repo_id="cyclevla/libero_decomposed_progress",
+            base_config=DataConfig(prompt_from_task=True),
+            extra_delta_transform=False,
+        ),
+        batch_size=256,
+        lr_schedule=_optimizer.CosineDecaySchedule(
+            warmup_steps=10_000,
+            peak_lr=5e-5,
+            decay_steps=1_000_000,
+            decay_lr=5e-5,
+        ),
+        optimizer=_optimizer.AdamW(clip_gradient_norm=1.0),
+        ema_decay=0.999,
+        weight_loader=weight_loaders.CheckpointWeightLoader("gs://openpi-assets/checkpoints/pi05_libero/params"),
+        pytorch_weight_path="/path/to/your/pytorch_weight_path",
+        num_train_steps=30_000,
+    ),
     #
     # Fine-tuning Aloha configs.
     #

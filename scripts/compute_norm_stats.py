@@ -3,6 +3,14 @@
 This script is used to compute the normalization statistics for a given config. It
 will compute the mean and standard deviation of the data in the dataset and save it
 to the config assets directory.
+
+Usage (run from `openpi/`):
+
+  # Upstream LIBERO LeRobot dataset (7-D actions):
+  uv run scripts/compute_norm_stats.py pi05_libero
+
+  # CycleVLA subtask-decomposed LIBERO LeRobot dataset (9-D actions):
+  uv run scripts/compute_norm_stats.py pi05_libero_cyclevla
 """
 
 import numpy as np
