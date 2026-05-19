@@ -288,6 +288,13 @@ class LeRobotLiberoDataConfig(DataConfigFactory):
 
     extra_delta_transform: bool = False
 
+    # Number of real action dimensions the policy should return at inference time.
+    # Default 7 = stock LIBERO [6D EEF delta, gripper]. CycleVLA uses 9 to also
+    # expose the [stop, progress] supervision dims. Inference-only: this only
+    # feeds `LiberoOutputs` and has no effect on training (outputs transforms
+    # are not applied in the training data pipeline).
+    action_dim: int = 7
+
     @override
     def create(self, assets_dirs: pathlib.Path, model_config: _model.BaseModelConfig) -> DataConfig:
         # The repack transform is *only* applied to the data coming from the dataset,
@@ -320,7 +327,7 @@ class LeRobotLiberoDataConfig(DataConfigFactory):
         # replace the transforms below with your own.
         data_transforms = _transforms.Group(
             inputs=[libero_policy.LiberoInputs(model_type=model_config.model_type)],
-            outputs=[libero_policy.LiberoOutputs()],
+            outputs=[libero_policy.LiberoOutputs(action_dim=self.action_dim)],
         )
 
         # One additional data transform: pi0 models are trained on delta actions (relative to the first
@@ -781,6 +788,11 @@ _CONFIGS = [
             repo_id="cyclevla/libero_decomposed_progress",
             base_config=DataConfig(prompt_from_task=True),
             extra_delta_transform=False,
+            # Return all 9 real dims at inference: [6D EEF delta, gripper,
+            # stop s_t, progress p_t]. Without this LiberoOutputs would slice
+            # to 7 and drop the stop/progress signals CycleVLA eval needs.
+            # Inference-only -- does not affect this config's training.
+            action_dim=9,
         ),
         batch_size=256,
         lr_schedule=_optimizer.CosineDecaySchedule(

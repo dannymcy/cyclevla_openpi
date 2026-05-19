@@ -92,9 +92,14 @@ class LiberoOutputs(transforms.DataTransformFn):
     For your own dataset, you can copy this class and modify the action dimension based on the comments below.
     """
 
+    # Number of leading action dimensions to return (the rest is model padding).
+    # Stock LIBERO is 7-dim [6D EEF delta, gripper]. CycleVLA augments this with
+    # two extra supervision dims [stop s_t, progress p_t] -> 9-dim, so the
+    # `pi05_libero_cyclevla` config sets this to 9 to expose s_t/p_t to the
+    # inference client. Default 7 keeps stock `pi05_libero` unchanged.
+    action_dim: int = 7
+
     def __call__(self, data: dict) -> dict:
         # Only return the first N actions -- since we padded actions above to fit the model action
         # dimension, we need to now parse out the correct number of actions in the return dict.
-        # For Libero, we only return the first 7 actions (since the rest is padding).
-        # For your own dataset, replace `7` with the action dimension of your dataset.
-        return {"actions": np.asarray(data["actions"][:, :7])}
+        return {"actions": np.asarray(data["actions"][:, : self.action_dim])}

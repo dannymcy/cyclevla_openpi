@@ -112,10 +112,13 @@
 
 
 # How to run
-# export XLA_PYTHON_CLIENT_PREALLOCATE=false
-# export XLA_PYTHON_CLIENT_MEM_FRACTION=0.95
+export XLA_PYTHON_CLIENT_PREALLOCATE=false
+export XLA_PYTHON_CLIENT_MEM_FRACTION=0.95
 # chmod +x scripts/train_pi05_libero_cyclevla.sh
 # scripts/train_pi05_libero_cyclevla.sh CycleVLA_libero_sub_decomposed_progress_pi05_A10 --project-name cyclevla_openpi --batch-size 32 --fsdp-devices 4 --overwrite
+
+# export XLA_PYTHON_CLIENT_MEM_FRACTION=0.70
+# scripts/train_pi05_libero_cyclevla.sh CycleVLA_libero_sub_decomposed_progress_pi05_A100 --project-name cyclevla_openpi --batch-size 128 --fsdp-devices 8 --overwrite
 
 set -euo pipefail
 
@@ -123,6 +126,12 @@ set -euo pipefail
 export HF_HOME=/hdd2/kai/openvla-oft/openpi/data/huggingface
 export HF_LEROBOT_HOME=/hdd2/kai/openvla-oft/openpi/data/lerobot
 export OPENPI_DATA_HOME=/hdd2/kai/openvla-oft/openpi/data/openpi
+
+# For training server
+# export HF_HOME=/home/to0space/ygy/openvla-oft/openpi/data/huggingface
+# export HF_LEROBOT_HOME=/home/to0space/ygy/openvla-oft/openpi/data/lerobot
+# export OPENPI_DATA_HOME=/home/to0space/ygy/openvla-oft/openpi/data/openpi
+# export WANDB_MODE=offline
 
 # Required positional arg.
 EXP_NAME="${1:?usage: $0 <exp_name> [tyro overrides...]}"
